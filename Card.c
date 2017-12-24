@@ -5,7 +5,7 @@ const suite_t CLUB = ((suite_t) 1<<1);
 const suite_t HEART = ((suite_t) 1<<2);
 const suite_t DIAMOND = ((suite_t) 1<<3);
 
-const face_t CARD_1 = 0;
+const face_t CARD_10 = 0;
 const face_t CARD_2 = 1;
 const face_t CARD_3 = 2;
 const face_t CARD_4 = 3;

@@ -45,6 +45,8 @@ void GameController_next_turn(GameController* this) {
 
     stay_on_turn = 0;
     /* prompt the player to make a turn */
+    Prompt_display_hud(current_player);
+    action = Prompt_get_action(Deck_cards_remaining(&this->deck) > 0);
     switch (action) {
         case Action_Query:
             if (do_query_player(this)) {

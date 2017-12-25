@@ -59,7 +59,7 @@ do
 done
 
 cflags="-o ${project_name}"
-source_list="gofish.c Prompt.c Deck.c GameController.c"
+source_list="gofish.c Prompt.c Deck.c GameController.c Player.c"
 if [ $do_lint -eq 1 ];
 then
     echo "lint not yet supported"

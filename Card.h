@@ -19,24 +19,26 @@ typedef unsigned short int suite_t;
 ***/
 typedef unsigned short int face_t;
 
-extern const suite_t SPADE;
-extern const suite_t CLUB;
-extern const suite_t HEART;
-extern const suite_t DIAMOND;
+#define SPADE ((suite_t) 1<<0)
+#define CLUB ((suite_t) 1<<1)
+#define HEART ((suite_t) 1<<2)
+#define DIAMOND ((suite_t) 1<<3)
 
-extern const face_t CARD_2;
-extern const face_t CARD_3;
-extern const face_t CARD_4;
-extern const face_t CARD_5;
-extern const face_t CARD_6;
-extern const face_t CARD_7;
-extern const face_t CARD_8;
-extern const face_t CARD_9;
-extern const face_t CARD_10;
-extern const face_t CARD_JACK;
-extern const face_t CARD_QUEEN;
-extern const face_t CARD_KING;
-extern const face_t CARD_ACE;
+#define CARD_2 ((face_t) 0)
+#define CARD_3 ((face_t) 1)
+#define CARD_4 ((face_t) 2)
+#define CARD_5 ((face_t) 3)
+#define CARD_6 ((face_t) 4)
+#define CARD_7 ((face_t) 5)
+#define CARD_8 ((face_t) 6)
+#define CARD_9 ((face_t) 7)
+#define CARD_10 ((face_t) 8)
+#define CARD_JACK ((face_t) 9)
+#define CARD_QUEEN ((face_t) 10)
+#define CARD_KING ((face_t) 11)
+#define CARD_ACE ((face_t) 12)
+#define CARD_MIN ((face_t) 0)
+#define CARD_MAX ((face_t) 12)
 
 struct card {
     suite_t suite;

@@ -17,7 +17,7 @@ void Deck_init(Deck* this) {
     card_idx = 0;
     for (i = 1; i < (suite_t)(1<<4); i<<=1) {
         for (j = 0; j < 13; j++) {
-            this->deck[card_idx].suite = (suite_t) (1 << i);
+            this->deck[card_idx].suite = i;
             this->deck[card_idx].face = j;
             card_idx++;
         }

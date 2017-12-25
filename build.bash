@@ -73,7 +73,6 @@ fi
 
 if [ $do_release -eq 1 ];
 then
-    clang -Weverything -O2 gofish.c -o gofish
     cflags="${cflags} -Weverything -O2"
 fi
 

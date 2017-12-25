@@ -39,6 +39,7 @@ typedef unsigned short int face_t;
 #define CARD_ACE ((face_t) 12)
 #define CARD_MIN ((face_t) 0)
 #define CARD_MAX ((face_t) 12)
+#define NUM_FACE_CARDS 13
 
 struct card {
     suite_t suite;

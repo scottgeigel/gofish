@@ -178,7 +178,7 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
     while (!final_selection_made) {
         if (choice)
         /* display the options to the user */
-        printf("%s\nOptions:", message);
+        printf("%s\nOptions:\n", message);
         for (i = 0; i < option_count; i++) {
             printf("\t%d) %s\n", i+1, option_list[i]);
         }
@@ -206,20 +206,25 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
     face_t option_map[NUM_FACE_CARDS];
     face_t idx;
     face_t ret;
+    int i;
     int option_count = 0;
     int valid_choice = 0;
     int choice;
 
+    /* build the option map */
+    for (idx = CARD_MIN; idx <= CARD_MAX; idx++) {
+        if (options[idx]) {
+            option_map[option_count] = idx;
+            option_count++; /* prompt the user in non-zero based values */
+        }
+    }
+
     while (!valid_choice) {
         printf("Which card would you like?\n");
-        for (idx = CARD_MIN; idx <= CARD_MAX; idx++) {
-            if (options[idx]) {
-                option_map[option_count] = idx;
-                option_count++; /* prompt the user in non-zero based values */
-                printf("\t%d) ", option_count);
-                Prompt_display_face(idx);
-                putchar('\n');
-            }
+        for (i = 0; i < option_count; i++) {
+            printf("\t%d) ", i + 1);
+            Prompt_display_face(option_map[i]);
+            putchar('\n');
         }
         /* assert that we actually have some valid options */
         if (option_count <= 0 || option_count >= NUM_FACE_CARDS) {

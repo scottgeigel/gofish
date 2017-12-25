@@ -10,7 +10,7 @@ static void deal_5_cards(GameController* this, Player* to);
 static void next_player(GameController* this);
 
 void GameController_init(GameController* this, int num_players, const char **player_names) {
-    int i;
+    int i, j;
     char player_name[PLAYER_MAX_NAME + 1];
     this->num_players = num_players;
     this->current_player = 0;
@@ -23,6 +23,12 @@ void GameController_init(GameController* this, int num_players, const char **pla
         Player_init(&this->players[i], player_name);
     }
     Deck_init(&this->deck);
+    /* deal each player 5 cards */
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < this->num_players; j++) {
+            deal_card(this, &this->players[j]);
+        }
+    }
 }
 
 int GameController_game_over(const GameController* this) {
@@ -139,18 +145,25 @@ static int do_query_player(GameController* this) {
 
 static void deal_card(GameController* this, Player* player) {
     struct card card = Deck_draw(&this->deck);
-    printf("You got a ");
+    printf("%s got a ", player->name);
     Prompt_display_card(card);
     putchar('\n');
     Player_give_card(player, card);
 }
 
 static void deal_5_cards(GameController* this, Player* to) {
-    fprintf(stderr, "not implemented\n");
-    abort();
+    int i;
+    for (i = 0; i < 5; i++) {
+        /* do we have cards left in the deck? */
+        if (Deck_cards_remaining(&this->deck) > 0) {
+            deal_card(this, to);
+        } else {
+            /* no more cards left */
+            break;
+        }
+    }
 }
 
 static void next_player(GameController* this) {
-    fprintf(stderr, "not implemented\n");
-    abort();
+    this->current_player = (this->current_player + 1) & this->num_players;
 }

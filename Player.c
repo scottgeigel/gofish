@@ -44,9 +44,10 @@ int Player_has_face_card(const Player* this, face_t face) {
     return this->hand[face] > 0;
 }
 
-void Player_give_face_cards_to(Player* to, Player* from, face_t face) {
+suite_t Player_give_face_cards_to(Player* to, Player* from, face_t face) {
     suite_t flags;
     flags = from->hand[face];
     from->hand[face] = 0;
     to->hand[face] |= flags;
+    return flags;
 }

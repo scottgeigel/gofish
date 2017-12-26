@@ -238,9 +238,10 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
         if (EOF == scanf("%d", &choice)) {
             fprintf(stderr, "an error occurred");
             abort();
-        } else if (choice < option_count && choice > 0) { /* check to make sure there was a reasonable selection */
+        } else if (choice <= option_count && choice > 0) { /* check to make sure there was a reasonable selection */
             valid_choice = 1;
-            ret = option_map[choice];
+            /* offset the choice, now that in a validated range, to an index */
+            ret = option_map[choice - 1];
         } else {
             /* invalid choice, prompt again */
             valid_choice = 0;

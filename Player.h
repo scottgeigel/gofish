@@ -16,5 +16,5 @@ void Player_tally_score(Player* this);
 void Player_give_card(Player* this, struct card card);
 int Player_has_cards(const Player* this);
 int Player_has_face_card(const Player* this, face_t face);
-void Player_give_face_cards_to(Player* to, Player* from, face_t face);
+suite_t Player_give_face_cards_to(Player* to, Player* from, face_t face);
 #endif

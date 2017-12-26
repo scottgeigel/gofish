@@ -51,6 +51,7 @@ void GameController_next_turn(GameController* this) {
 
     stay_on_turn = 0;
     /* prompt the player to make a turn */
+    printf("\n\n\n");
     Prompt_display_hud(current_player);
     action = Prompt_get_action(Deck_cards_remaining(&this->deck) > 0);
     switch (action) {
@@ -58,6 +59,7 @@ void GameController_next_turn(GameController* this) {
             if (do_query_player(this)) {
                 /* stays on the same turn */
                 stay_on_turn = 1;
+                printf("%s gets to go again!!!\n", current_player->name);
             } else {
                 printf("Go Fish\n");
                 deal_card(this, current_player);
@@ -91,6 +93,8 @@ static int do_query_player(GameController* this) {
     int i;
     int target_player;
     face_t target_card;
+    suite_t taken_cards;
+    struct card card_buf;
     int got_cards;
 
     got_cards = 0;
@@ -113,23 +117,58 @@ static int do_query_player(GameController* this) {
         }
     }
     /* present the options to the player and get feedback */
-    target_player = Prompt_get_target_option("Which player?", player_labels, valid_players);
-    if (target_player < 0) {
+    i = Prompt_get_target_option("Which player?", player_labels, valid_players);
+    /* validate i, as an index, for our player_label/option map */
+    if (i < 0) {
         fprintf(stderr, "an error occurred while getting the target player\n");
         abort();
-    } else if (target_player >= this->num_players) {
-        fprintf(stderr, "received invalid target player (%d) from prompt", target_player);
+    } else if (i > this->num_players) {
+        fprintf(stderr, "received invalid target player (%d) from prompt", i);
         abort();
     } else {
+        /* now that i has been validated, pull the target player out */
+        target_player = player_map[i];
         /* build the list of cards the player has */
         memset(card_map, 0, sizeof(card_map));
         for (i = 0; i < NUM_FACE_CARDS; i++) {
             card_map[i] = this->players[this->current_player].hand[i] > 0;
         }
         target_card = Prompt_pick_a_card(card_map);
+
+        printf("%s asks %s if they have any ", this->players[this->current_player].name, this->players[target_player].name);
+        Prompt_display_face(target_card);
+        printf("s\n");
+
         if (Player_has_face_card(&this->players[target_player], target_card)) {
             /* take cards from that player */
-            Player_give_face_cards_to(&this->players[target_player], &this->players[this->current_player], target_card);
+            taken_cards = Player_give_face_cards_to(&this->players[target_player], &this->players[this->current_player], target_card);
+            /* display the cards that the current player has acquired */
+            card_buf.face = target_card;
+            printf("You got: \n");
+            if (taken_cards & SPADE) {
+                putchar('\t');
+                card_buf.suite = SPADE;
+                Prompt_display_card(card_buf);
+                putchar('\n');
+            }
+            if (taken_cards & CLUB) {
+                putchar('\t');
+                card_buf.suite = CLUB;
+                Prompt_display_card(card_buf);
+                putchar('\n');
+            }
+            if (taken_cards & HEART) {
+                putchar('\t');
+                card_buf.suite = HEART;
+                Prompt_display_card(card_buf);
+                putchar('\n');
+            }
+            if (taken_cards & DIAMOND) {
+                putchar('\t');
+                card_buf.suite = DIAMOND;
+                Prompt_display_card(card_buf);
+                putchar('\n');
+            }
             /* check to see if we took away the last cards */
             if (!Player_has_cards(&this->players[target_player])) {
                 deal_5_cards(this, &this->players[target_player]);
@@ -165,5 +204,5 @@ static void deal_5_cards(GameController* this, Player* to) {
 }
 
 static void next_player(GameController* this) {
-    this->current_player = (this->current_player + 1) & this->num_players;
+    this->current_player = (this->current_player + 1) % this->num_players;
 }

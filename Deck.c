@@ -27,7 +27,7 @@ void Deck_init(Deck* this) {
         the selected card with one at a random index
     */
     for (i = 0; i < 52; i++) {
-        card_idx = rand() & 52;
+        card_idx = rand() % 52;
         swap_card = this->deck[card_idx];
         this->deck[card_idx] = this->deck[i];
         this->deck[i] = swap_card;

@@ -48,12 +48,15 @@ void GameController_next_turn(GameController* this) {
     int stay_on_turn;
     int previous_points = current_player->score;
     int score_diff;
+    const int cards_in_deck = Deck_cards_remaining(&this->deck) > 0;
+    const int cards_in_hand = Player_has_cards(current_player);
 
     stay_on_turn = 0;
+
     /* prompt the player to make a turn */
     printf("\n\n\n");
     Prompt_display_hud(current_player);
-    action = Prompt_get_action(Deck_cards_remaining(&this->deck) > 0);
+    action = Prompt_get_action(cards_in_deck, cards_in_hand);
     switch (action) {
         case Action_Query:
             if (do_query_player(this)) {
@@ -74,6 +77,16 @@ void GameController_next_turn(GameController* this) {
         default:
             fprintf(stderr, "received invalid action\n");
             abort();
+    }
+    /* check to see if the player is out of cards */
+    while (!Player_has_cards(current_player)) {
+        deal_5_cards(this, current_player);
+        /*
+            check to see if the player happened to get a matching suite,
+            this should really only happen if there were only 4 cards left
+            in the deck, and they were all the same face value
+        */
+        Player_tally_score(current_player);
     }
     Player_tally_score(current_player);
     if (previous_points != current_player->score) {
@@ -141,7 +154,7 @@ static int do_query_player(GameController* this) {
 
         if (Player_has_face_card(&this->players[target_player], target_card)) {
             /* take cards from that player */
-            taken_cards = Player_give_face_cards_to(&this->players[target_player], &this->players[this->current_player], target_card);
+            taken_cards = Player_give_face_cards_to(&this->players[this->current_player], &this->players[target_player], target_card);
             /* display the cards that the current player has acquired */
             card_buf.face = target_card;
             printf("You got: \n");

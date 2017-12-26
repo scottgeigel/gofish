@@ -122,16 +122,24 @@ void Prompt_display_card(const struct card card) {
     printf("'s");
 }
 
-Action Prompt_get_action(int can_draw) {
+Action Prompt_get_action(int can_draw, int can_ask) {
     Action action = Action_Invalid;
     int buf;
     char choice;
+    /* assert we're in a valid prompt */
+    if (!can_draw && !can_ask) {
+        fprintf(stderr, "can_draw(%d) and can_ask(%d) cannot both be 0\n", can_draw, can_ask);
+        abort();
+    }
+    /* loop until the user provides a valid response */
     while (action == Action_Invalid) {
         printf("Options:\n");
         if (can_draw) {
             printf("\td) Draw a card\n");
         }
-        printf("\ta) Ask a player for a card\n");
+        if (can_ask) {
+            printf("\ta) Ask a player for a card\n");
+        }
         printf("\te) exit\n");
 
         /* skip any whitespace */
@@ -148,7 +156,9 @@ Action Prompt_get_action(int can_draw) {
             */
             switch (choice) {
                 case 'a':
-                    action = Action_Query;
+                    if (can_ask) {
+                        action = Action_Query;
+                    }
                     break;
                 case 'e':
                     action = Action_Exit;
@@ -227,7 +237,7 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
             putchar('\n');
         }
         /* assert that we actually have some valid options */
-        if (option_count <= 0 || option_count >= NUM_FACE_CARDS) {
+        if (option_count <= 0 || option_count > NUM_FACE_CARDS) {
             fprintf(stderr, "ended up with invalid option_count of %d\n", option_count);
             abort();
         }

@@ -26,10 +26,12 @@ void Prompt_display_face(const face_t face);
 void Prompt_display_card(const struct card card);
 /***
     Displays message and gets an action from the user.
-    If can_draw is 0, the option to use Action_Draw
-    is removed.
+    If can_draw is 0, the option to use Action_Draw is removed
+    If can_ask is 0, the option to use Action_Query is removed
+
+    a 0 value for can_ask and can_draw are mutually exclusive
 ***/
-Action Prompt_get_action(int can_draw);
+Action Prompt_get_action(int can_draw, int can_ask);
 
 /***
     Prompts the user to select an item from the list.

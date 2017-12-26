@@ -197,7 +197,7 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
             /* an error occured, pass this onto the user */
             choice = -1;
             final_selection_made = 1;
-        } else if (1 <= i && i <= option_count) {
+        } else if (1 <= choice && choice <= option_count) {
             /*
                 user input is in range of the option_list, conver to index
                 and pass on to user
@@ -207,6 +207,7 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
         } else {
             /* final selection not made, re-run the prompt */
             final_selection_made = 0;
+            printf("Invalid selection %d\n", choice);
         }
     }
     return choice;

@@ -39,6 +39,7 @@ Action Prompt_get_action(int can_draw, int can_ask);
     Returns the index, aka user input subtracted by 1, of the chosen option.
     Returns a value less than 0 if an error occurred.
 ***/
+
 int Prompt_get_target_option(const char* message, const char** option_list, const int option_count);
 /***
     Prompts the user to select a card from a list. It takes a list of flags
@@ -55,4 +56,19 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
     Returns the face value of the selected card.
 ***/
 face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]);
+
+/***
+    Reads an entire line from stdin. It returns the first non-whitespace
+    character. If the line is empty, it will continue reading to the first line
+    with a non-whitespace character.
+***/
+char Prompt_getline_char();
+
+/***
+    Reads an entire line from stdin. It returns the first positive integer
+    encountered. if the line is empty, or does not contain a positive integer,
+    it will continue reading until reaching the first line with a positive
+    integer.
+***/
+unsigned int Prompt_getline_uint();
 #endif

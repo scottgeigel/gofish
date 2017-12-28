@@ -1,7 +1,10 @@
+#ifndef lint
 #include <stdio.h>
 #include <stdlib.h>
-#include "Prompt.h"
 #include <ctype.h>
+#endif
+
+#include "Prompt.h"
 
 void Prompt_display_hud(const Player* player) {
     face_t i;
@@ -142,9 +145,7 @@ Action Prompt_get_action(int can_draw, int can_ask) {
         }
         printf("\te) exit\n");
 
-        /* skip any whitespace */
-        do { buf = getchar(); } while (isspace(buf));
-        choice = (char) buf;
+        choice = Prompt_getline_char();;
         /*
             is the user is trying to close via  EOF, go ahead and translate to exit
         */
@@ -193,11 +194,8 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
             printf("\t%d) %s\n", i+1, option_list[i]);
         }
         /* get the response from the user */
-        if (EOF == scanf("%d", &choice)) {
-            /* an error occured, pass this onto the user */
-            choice = -1;
-            final_selection_made = 1;
-        } else if (1 <= choice && choice <= option_count) {
+        choice = Prompt_getline_uint();
+        if (1 <= choice && choice <= option_count) {
             /*
                 user input is in range of the option_list, conver to index
                 and pass on to user
@@ -242,14 +240,9 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
             fprintf(stderr, "ended up with invalid option_count of %d\n", option_count);
             abort();
         }
-        /*
-            be sure to handle unsuccessful scanf's, though we don't have an
-            out of range value to provide for this function
-        */
-        if (EOF == scanf("%d", &choice)) {
-            fprintf(stderr, "an error occurred");
-            abort();
-        } else if (choice <= option_count && choice > 0) { /* check to make sure there was a reasonable selection */
+
+        choice = Prompt_getline_uint();
+        if (choice <= option_count && choice > 0) { /* check to make sure there was a reasonable selection */
             valid_choice = 1;
             /* offset the choice, now that in a validated range, to an index */
             ret = option_map[choice - 1];
@@ -259,5 +252,40 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
             printf("invalid choice %d\n", choice);
         }
     }
+    return ret;
+}
+
+char Prompt_getline_char() {
+    int buf;
+    /* skip all non printable characters */
+    do {
+        buf = getchar();
+    } while (!isgraph(buf));
+    /* now that we have a character, skip until the end of the line */
+    while (getchar() != '\n');
+    return buf;
+}
+
+unsigned int Prompt_getline_uint() {
+    unsigned int ret = 0;
+    int buf;
+
+    /* skip all non-numeric characters */
+    do {
+        buf = getchar();
+    } while (!isdigit(buf));
+
+    do {
+        /* shift the digit on the accumulator and hope there isn't an overflow */
+        ret *= 10;
+        ret += buf - '0';
+        buf = getchar();
+    } while (isdigit(buf));
+
+    /* consume the rest of the charcters until the end of the line */
+    while (buf != '\n') {
+        buf = getchar();
+    }
+
     return ret;
 }

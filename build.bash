@@ -9,6 +9,7 @@ do_debug=0
 do_release=0
 do_lint=0
 do_standard=1
+should_build=0
 
 function debug() {
     echo "doing debug stuff"
@@ -19,6 +20,7 @@ function debug() {
     then
         echo "WARNING: debug and release are mutually exclusive"
     fi
+    should_build=1
 }
 
 function release() {
@@ -30,12 +32,16 @@ function release() {
     then
         echo "WARNING: release and debug are mutually exclusive"
     fi
+    should_build=1
 }
 
 function lint() {
     echo "doing lint stuff"
     do_lint=1
+    should_build=0
 }
+
+should_build=1
 
 for var in "$@"
 do
@@ -58,28 +64,34 @@ do
     esac
 done
 
-cflags="-o ${project_name}"
+cflags="-o ${project_name} -std=c89"
 source_list="gofish.c Prompt.c Deck.c GameController.c Player.c"
-if [ $do_lint -eq 1 ];
+
+if [ $should_build -eq 1 ];
 then
-    echo "lint not yet supported"
-    echo "and it probably won't because splint makes me sad"
+	if [ $do_debug -eq 1 ];
+	then
+	    cflags="${cflags} -ggdb"
+	fi
+	
+	if [ $do_release -eq 1 ];
+	then
+	    cflags="${cflags} -Weverything -O2"
+	fi
+	
+	if [ $do_standard -eq 1 ];
+	then
+	    : # do nothing
+	fi
+	
+	clang $cflags $source_list
+
+else
+	if [ $do_lint -eq 1 ];
+	then
+		splint -Dlint $source_list
+	fi
 fi
 
-if [ $do_debug -eq 1 ];
-then
-    cflags="${cflags} -ggdb"
-fi
-
-if [ $do_release -eq 1 ];
-then
-    cflags="${cflags} -Weverything -O2"
-fi
-
-if [ $do_standard -eq 1 ];
-then
-    : # do nothing
-fi
-
-clang $cflags $source_list
 exit 0
+

@@ -62,7 +62,7 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]);
     character. If the line is empty, it will continue reading to the first line
     with a non-whitespace character.
 ***/
-char Prompt_getline_char();
+char Prompt_getline_char(void);
 
 /***
     Reads an entire line from stdin. It returns the first positive integer
@@ -70,5 +70,5 @@ char Prompt_getline_char();
     it will continue reading until reaching the first line with a positive
     integer.
 ***/
-unsigned int Prompt_getline_uint();
+unsigned int Prompt_getline_uint(void);
 #endif

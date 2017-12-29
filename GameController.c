@@ -74,7 +74,7 @@ void GameController_next_turn(GameController* this) {
         case Action_Exit:
             printf("%s took the coward's way out\n", current_player->name);
             exit(EXIT_SUCCESS);
-        default:
+        case Action_Invalid:
             fprintf(stderr, "received invalid action\n");
             abort();
     }

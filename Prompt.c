@@ -6,6 +6,24 @@
 
 #include "Prompt.h"
 
+static void confirm_exit() {
+    int choice;
+try_again:
+    printf("Do you really want to exit?\n");
+    printf("y/n: ");
+    choice = getchar();
+    if (choice == 'y' || choice == 'Y') {
+        printf("terminated\n");
+        exit(EXIT_SUCCESS);
+    } else if (choice == 'n' || choice == 'N') {
+        /* consume the rest of the line */
+        do { choice = getchar(); } while (choice != '\n');
+        /* leave the function as the user doesn't really want to exit */
+    } else {
+        printf("I don't understande %c\n", choice);
+        goto try_again;
+    }
+}
 void Prompt_display_hud(const Player* player) {
     face_t i;
     int print_comma;
@@ -127,7 +145,6 @@ void Prompt_display_card(const struct card card) {
 
 Action Prompt_get_action(int can_draw, int can_ask) {
     Action action = Action_Invalid;
-    int buf;
     char choice;
     /* assert we're in a valid prompt */
     if (!can_draw && !can_ask) {
@@ -194,7 +211,7 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
             printf("\t%d) %s\n", i+1, option_list[i]);
         }
         /* get the response from the user */
-        choice = Prompt_getline_uint();
+        choice = (int) Prompt_getline_uint(); /* range check below will take care of overlow */
         if (1 <= choice && choice <= option_count) {
             /*
                 user input is in range of the option_list, conver to index
@@ -214,7 +231,7 @@ int Prompt_get_target_option(const char* message, const char** option_list, cons
 face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
     face_t option_map[NUM_FACE_CARDS];
     face_t idx;
-    face_t ret;
+    face_t ret = CARD_INVALID;
     int i;
     int option_count = 0;
     int valid_choice = 0;
@@ -241,7 +258,7 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
             abort();
         }
 
-        choice = Prompt_getline_uint();
+        choice = (int) Prompt_getline_uint(); /* range check below will take care of overflow */
         if (choice <= option_count && choice > 0) { /* check to make sure there was a reasonable selection */
             valid_choice = 1;
             /* offset the choice, now that in a validated range, to an index */
@@ -252,18 +269,37 @@ face_t Prompt_pick_a_card(const int options[NUM_FACE_CARDS]) {
             printf("invalid choice %d\n", choice);
         }
     }
+
     return ret;
 }
 
 char Prompt_getline_char() {
     int buf;
+    char ret = '\0';
     /* skip all non printable characters */
     do {
         buf = getchar();
+        /* make sure we exit on errors instead of running indefinitely */
+        if (buf < 0) {
+            confirm_exit();
+        }
     } while (!isgraph(buf));
+
     /* now that we have a character, skip until the end of the line */
-    while (getchar() != '\n');
-    return buf;
+    ret = (char) buf;
+    do {
+        buf = getchar();
+        /*
+            make sure we exit on errors instead of hopelessly searching
+            for the linefeed
+        */
+        if (buf < 0) {
+            confirm_exit();
+            break; /* it's ok to exit here */
+        }
+    } while (buf != '\n');
+
+    return ret;
 }
 
 unsigned int Prompt_getline_uint() {
@@ -273,18 +309,40 @@ unsigned int Prompt_getline_uint() {
     /* skip all non-numeric characters */
     do {
         buf = getchar();
+        /* make sure we exit on errors instead of running indefinitely */
+        if (buf < 0) {
+            confirm_exit();
+        }
     } while (!isdigit(buf));
 
     do {
         /* shift the digit on the accumulator and hope there isn't an overflow */
         ret *= 10;
-        ret += buf - '0';
+        ret += (unsigned int) (buf - '0'); /* we're guarded by isdigit */
         buf = getchar();
+        /* make sure we exit on errors instead of running indefinitely */
+        if (buf < 0) {
+            confirm_exit();
+             /*
+                number interrupted here, create a false newline, on the user's
+                beahlf to exit the function.
+            */
+            buf = '\n';
+            break;
+        }
     } while (isdigit(buf));
 
     /* consume the rest of the charcters until the end of the line */
     while (buf != '\n') {
         buf = getchar();
+        /*
+            make sure we exit on errors instead of hopelessly searching
+            for the linefeed
+        */
+        if (buf < 0) {
+            confirm_exit();
+            break; /* it's ok to exit here */
+        }
     }
 
     return ret;

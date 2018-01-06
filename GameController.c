@@ -43,41 +43,27 @@ int GameController_game_over(const GameController* this) {
 }
 
 void GameController_next_turn(GameController* this) {
-    Action action;
     Player* current_player = &this->players[this->current_player];
     int stay_on_turn;
     int previous_points = current_player->score;
     int score_diff;
     const int cards_in_deck = Deck_cards_remaining(&this->deck) > 0;
-    const int cards_in_hand = Player_has_cards(current_player);
-
     stay_on_turn = 0;
 
     /* prompt the player to make a turn */
     printf("\n\n\n");
     Prompt_display_hud(current_player);
-    action = Prompt_get_action(cards_in_deck, cards_in_hand);
-    switch (action) {
-        case Action_Query:
-            if (do_query_player(this)) {
-                /* stays on the same turn */
-                stay_on_turn = 1;
-                printf("%s gets to go again!!!\n", current_player->name);
-            } else {
-                printf("Go Fish\n");
-                deal_card(this, current_player);
-            }
-            break;
-        case Action_Draw:
-            deal_card(this, current_player);
-            break;
-        case Action_Exit:
-            printf("%s took the coward's way out\n", current_player->name);
-            exit(EXIT_SUCCESS);
-        case Action_Invalid:
-            fprintf(stderr, "received invalid action\n");
-            abort();
+    if (do_query_player(this)) {
+        /* stays on the same turn */
+        stay_on_turn = 1;
+        printf("%s gets to go again!!!\n", current_player->name);
+    } else if (cards_in_deck > 0){
+        printf("Go Fish\n");
+        deal_card(this, current_player);
+    } else {
+        printf("No more cards remain in the deck\n");
     }
+
     /* check to see if the player is out of cards */
     while (!Player_has_cards(current_player)) {
         deal_5_cards(this, current_player);
@@ -93,6 +79,7 @@ void GameController_next_turn(GameController* this) {
         score_diff = current_player->score - previous_points;
         printf("%s got %d point%s\n", current_player->name, score_diff, (score_diff == 1)? "" : "s");
     }
+    Prompt_confirm_turn();
     if (!stay_on_turn) {
         next_player(this);
     }

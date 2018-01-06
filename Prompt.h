@@ -3,35 +3,10 @@
 #include "Card.h"
 #include "Player.h"
 
-typedef enum {
-    Action_Query,
-    Action_Draw,
-    Action_Exit,
-    Action_Invalid
-} Action;
-
-struct query {
-    int which_player;
-    int which_card;
-};
-
-struct player_choice {
-    Action action;
-    struct query question;
-};
-
 void Prompt_display_hud(const Player* player);
 void Prompt_display_suite(const suite_t suite);
 void Prompt_display_face(const face_t face);
 void Prompt_display_card(const struct card card);
-/***
-    Displays message and gets an action from the user.
-    If can_draw is 0, the option to use Action_Draw is removed
-    If can_ask is 0, the option to use Action_Query is removed
-
-    a 0 value for can_ask and can_draw are mutually exclusive
-***/
-Action Prompt_get_action(int can_draw, int can_ask);
 
 /***
     Prompts the user to select an item from the list.
@@ -71,4 +46,9 @@ char Prompt_getline_char(void);
     integer.
 ***/
 unsigned int Prompt_getline_uint(void);
+
+/***
+    Blocks until the user presses the enter key
+***/
+void Prompt_confirm_turn(void);
 #endif

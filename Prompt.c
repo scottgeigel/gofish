@@ -143,86 +143,37 @@ void Prompt_display_card(const struct card card) {
     printf("'s");
 }
 
-Action Prompt_get_action(int can_draw, int can_ask) {
-    Action action = Action_Invalid;
-    char choice;
-    /* assert we're in a valid prompt */
-    if (!can_draw && !can_ask) {
-        fprintf(stderr, "can_draw(%d) and can_ask(%d) cannot both be 0\n", can_draw, can_ask);
-        abort();
-    }
-    /* loop until the user provides a valid response */
-    while (action == Action_Invalid) {
-        printf("Options:\n");
-        if (can_draw) {
-            printf("\td) Draw a card\n");
-        }
-        if (can_ask) {
-            printf("\ta) Ask a player for a card\n");
-        }
-        printf("\te) exit\n");
-
-        choice = Prompt_getline_char();;
-        /*
-            is the user is trying to close via  EOF, go ahead and translate to exit
-        */
-        if (choice == '\0') {
-            action = Action_Exit;
-        } else {
-            /*
-                match against known input
-            */
-            switch (choice) {
-                case 'a':
-                    if (can_ask) {
-                        action = Action_Query;
-                    }
-                    break;
-                case 'e':
-                    action = Action_Exit;
-                    break;
-                case 'd':
-                    if (can_draw) {
-                        action = Action_Draw;
-                    } /* else action will remain Action_Invalid and go to the invalid message */
-                    break;
-                default:
-                    /* action will remain Action_Invalid and go to the invalid message */
-                    break;
-            }
-        }
-        if (action == Action_Invalid) {
-            printf("%c is an invalid option\n", choice);
-        }
-    }
-    return action;
-}
-
 int Prompt_get_target_option(const char* message, const char** option_list, const int option_count) {
     int i;
     int choice = -1;
     int final_selection_made = 0;
 
-    while (!final_selection_made) {
-        if (choice)
-        /* display the options to the user */
-        printf("%s\nOptions:\n", message);
-        for (i = 0; i < option_count; i++) {
-            printf("\t%d) %s\n", i+1, option_list[i]);
-        }
-        /* get the response from the user */
-        choice = (int) Prompt_getline_uint(); /* range check below will take care of overlow */
-        if (1 <= choice && choice <= option_count) {
-            /*
-                user input is in range of the option_list, conver to index
-                and pass on to user
-            */
-            choice -= 1;
-            final_selection_made = 1;
-        } else {
-            /* final selection not made, re-run the prompt */
-            final_selection_made = 0;
-            printf("Invalid selection %d\n", choice);
+    /* if there's only 1 option, we'll pick for the user */
+    if (option_count == 1) {
+        printf("auto-selected lone option %s\n", option_list[0]);
+        choice =  0;
+    } else {
+        while (!final_selection_made) {
+            if (choice)
+            /* display the options to the user */
+            printf("%s\nOptions:\n", message);
+            for (i = 0; i < option_count; i++) {
+                printf("\t%d) %s\n", i+1, option_list[i]);
+            }
+            /* get the response from the user */
+            choice = (int) Prompt_getline_uint(); /* range check below will take care of overlow */
+            if (1 <= choice && choice <= option_count) {
+                /*
+                    user input is in range of the option_list, conver to index
+                    and pass on to user
+                */
+                choice -= 1;
+                final_selection_made = 1;
+            } else {
+                /* final selection not made, re-run the prompt */
+                final_selection_made = 0;
+                printf("Invalid selection %d\n", choice);
+            }
         }
     }
     return choice;
@@ -336,8 +287,7 @@ unsigned int Prompt_getline_uint() {
     while (buf != '\n') {
         buf = getchar();
         /*
-            make sure we exit on errors instead of hopelessly searching
-            for the linefeed
+            make sure we prompt the user as to whether they want to exit or not
         */
         if (buf < 0) {
             confirm_exit();
@@ -346,4 +296,19 @@ unsigned int Prompt_getline_uint() {
     }
 
     return ret;
+}
+
+void Prompt_confirm_turn() {
+    int buf;
+    printf("Press enter to continue to the next turn\n");
+    do {
+        buf = getchar();
+        /*
+            make sure we prompt the user as to whether they want to exit or not
+        */
+        if (buf < 0) {
+            confirm_exit();
+            break;
+        }
+    } while (buf != '\n');
 }
